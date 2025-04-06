@@ -7,7 +7,6 @@ interface LoginResponse {
   user?: {
     _id: string;
     username: string;
-    // add more fields if your user model has them
   };
 }
 

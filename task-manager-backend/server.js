@@ -1,9 +1,16 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv').config();
-const connectDb = require('./config/dbConnection');
+const pool = require('./config/dbConnection');
 
-connectDb();
+
+pool.connect()
+  .then(() => console.log('Database connected.'))
+  .catch(err => {
+    console.error('Database connection failed:', err);
+    process.exit(1);
+  });
+
 const app = express();
 
 const port = process.env.PORT || 8000;

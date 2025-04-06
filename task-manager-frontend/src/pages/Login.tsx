@@ -28,6 +28,15 @@ const Login: React.FC = () => {
         } else if (result["status"] == 401) {
             alert('Invalid credentials');
         }
+        else if (result["status"] == 400) {
+            alert('Please enter username and password.');
+        }
+        else if (result["status"] == 404) {
+            alert('User not found');
+        }
+        else {
+            alert('Server error');
+        }
     };
 
     return (

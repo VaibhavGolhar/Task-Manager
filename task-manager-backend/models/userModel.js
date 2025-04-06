@@ -1,18 +1,22 @@
-const mongoose = require("mongoose");
+const sql = require('mssql');
 
-const userSchema = mongoose.Schema({
+const User = {
     username: {
-        type: String,
-        required: [true, "Please add a username"]
+        type: sql.VarChar,
+        required: true
     },
     password: {
-        type: String,
-        required: [true, "Please add a password"]
+        type: sql.VarChar,
+        required: true
     },
+    role: {
+        type: sql.VarChar,
+        required: true
     },
-    {
-        timestamps: true
+    department: {
+        type: sql.VarChar, // or sql.Int if it's a foreign key to a departments table
+        required: false
     }
-);
+};
 
-module.exports = mongoose.model("User", userSchema); 
+module.exports = User;

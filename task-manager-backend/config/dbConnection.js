@@ -1,13 +1,22 @@
-const { mongoose } = require("mongoose")
+const sql = require('mssql');
 
-const connectDb = async () => {
-    try{
-        const connect = await mongoose.connect(process.env.CONNECTION_STRING);
-        console.log('MongoDB Connected: ', connect.connection.host, connect.connection.name);
-    } catch (err){
-        console.log(err)
-        process.exit(1)
+const config = {
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    server: process.env.DB_SERVER, 
+    database: process.env.DB_NAME,
+    driver: "ODBC Driver 18 for SQL Server",
+    options: {
+        encrypt: true,
+        trustServerCertificate: true,
     }
 };
 
-module.exports = connectDb;
+const pool = new sql.ConnectionPool(config);
+const poolConnect = pool.connect();
+
+pool.on('error', err => {
+    console.error('SQL pool error', err);
+});
+
+module.exports = pool;
