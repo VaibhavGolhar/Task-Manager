@@ -1,0 +1,161 @@
+USE [taskmanagerdatabase]
+GO
+/****** Object:  Table [dbo].[Department]    Script Date: 15/Apr/2025 17:45:14 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Department]
+(
+    [DearptmentId] [int] IDENTITY(1,1) NOT NULL,
+    [Department] [varchar](50) NULL,
+    CONSTRAINT [PK_Department] PRIMARY KEY CLUSTERED 
+(
+	[DearptmentId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Designation]    Script Date: 15/Apr/2025 17:45:14 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Designation]
+(
+    [DesignationId] [int] IDENTITY(1,1) NOT NULL,
+    [Designation] [varchar](50) NULL,
+    CONSTRAINT [PK_Designation] PRIMARY KEY CLUSTERED 
+(
+	[DesignationId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[EmployeeHierarchy]    Script Date: 15/Apr/2025 17:45:14 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[EmployeeHierarchy]
+(
+    [Id] [bigint] IDENTITY(1,1) NOT NULL,
+    [EmpId] [bigint] NULL,
+    [ReportingHeadId] [bigint] NULL,
+    CONSTRAINT [PK_Hierarchy] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[EmployeeMaster]    Script Date: 15/Apr/2025 17:45:14 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[EmployeeMaster]
+(
+    [Id] [bigint] NOT NULL,
+    [EmployeeId] [bigint] NULL,
+    [EmployeeName] [varchar](150) NULL,
+    [DepartmentId] [bigint] NULL,
+    [DesignationId] [bigint] NULL,
+    [EmployeeTypeId] [int] NULL,
+    [MobileNo] [nchar](10) NULL,
+    [DateofBirth] [date] NULL,
+    [JoingDate] [date] NULL,
+    CONSTRAINT [PK_EmployeeMaster] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Login]    Script Date: 15/Apr/2025 17:45:14 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Login]
+(
+    [Id] [bigint] IDENTITY(1,1) NOT NULL,
+    [EmpId] [bigint] NULL,
+    [Password] [bigint] NULL,
+    [MobileNo] [nchar](10) NULL,
+    [Otp] [int] NULL,
+    [OtpTime] [datetime] NULL,
+    [AlreadyLogin] [bit] NULL,
+    CONSTRAINT [PK_Login] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Reference]    Script Date: 15/Apr/2025 17:45:14 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Reference]
+(
+    [TypeID] [int] NOT NULL,
+    [GroupName] [char](20) NOT NULL,
+    [Description] [varchar](500) NOT NULL,
+    [DisplayOrder] [smallint] NULL,
+    [CreatedDate] [datetime] NOT NULL,
+    [UpdatedDate] [datetime] NULL,
+    [deleted] [bit] NOT NULL,
+    [Type] [char](20) NULL,
+    CONSTRAINT [PK_Reference] PRIMARY KEY CLUSTERED 
+(
+	[TypeID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[TaskCreate_Header]    Script Date: 15/Apr/2025 17:45:14 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TaskCreate_Header]
+(
+    [TaskId] [bigint] NOT NULL,
+    [TaskTypeId] [int] NULL,
+    [TaskDesc] [nvarchar](max) NULL,
+    [DeptId] [int] NULL,
+    [AssignToId] [bigint] NULL,
+    [AssignById] [bigint] NULL,
+    [Priority] [int] NULL,
+    [TaskCreateDate] [datetime] NULL,
+    [FromDate] [date] NULL,
+    [FromTime] [time](7) NULL,
+    [EndDate] [date] NULL,
+    [EndTime] [time](7) NULL,
+    [EstimateHrs] [int] NULL,
+    [Remark] [nvarchar](300) NULL,
+    [ActualEndDate] [date] NULL,
+    [ActualEndTime] [time](7) NULL,
+    [CreatedBy] [bigint] NULL,
+    [CreatedByDate] [datetime] NULL,
+    [Status] [varchar](10) NULL,
+    CONSTRAINT [PK_TaskCreate_Header] PRIMARY KEY CLUSTERED 
+(
+	[TaskId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[TaskCreate_Row]    Script Date: 15/Apr/2025 17:45:14 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TaskCreate_Row]
+(
+    [Id] [bigint] IDENTITY(1,1) NOT NULL,
+    [TaskId] [bigint] NULL,
+    [Comment] [nvarchar](500) NULL,
+    [WorkingHrs] [int] NULL,
+    [FileUpload] [nvarchar](max) NULL,
+    CONSTRAINT [PK_TaskCreate_Row] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO

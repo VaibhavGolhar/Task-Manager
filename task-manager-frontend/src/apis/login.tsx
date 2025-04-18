@@ -5,16 +5,18 @@ const API_BASE_URL = 'http://localhost:8080';
 interface LoginResponse {
   message: string;
   user?: {
-    _id: string;
-    username: string;
+    empId: number;
+    employeeName: string;
+    designation: string;
   };
+  redirectTo?: string;
 }
 
-export const loginUser = async (username: string, password: string): Promise<{ status: number; data: LoginResponse }> => {
+export const loginUser = async (username: bigint, password: bigint): Promise<{ status: number; data: LoginResponse }> => {
   try {
     const response = await axios.post(`${API_BASE_URL}/api/login`, {
-      username: username,
-      password: password,
+      empId: username.toString(),
+      password: password.toString(),
     });
 
     return {
@@ -22,6 +24,7 @@ export const loginUser = async (username: string, password: string): Promise<{ s
       data: response.data
     };
   } catch (error: unknown) {
+   //alert(error);
     // If error response exists, return its status and message
     if (axios.isAxiosError(error) && error.response) {
       return {

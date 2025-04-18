@@ -1,8 +1,10 @@
 import { IonButton, IonCard, IonCardContent, IonContent, IonHeader, IonIcon, IonInput, IonPage, IonTitle, IonToolbar } from '@ionic/react';
-import { settings } from 'ionicons/icons';
-import React from 'react';
+import { settings, eye, eyeOff } from 'ionicons/icons';
+import React, { useEffect } from 'react';
 import { loginUser } from '../apis/login';
 import logo from '../assets/logo.svg';
+import { Preferences } from '@capacitor/preferences';
+import { useHistory } from 'react-router-dom';
 
 const cardStyle: React.CSSProperties = {
     width: '90%',
@@ -16,15 +18,42 @@ const logoStyle: React.CSSProperties = {
     minWidth: '60px'
 };
 
+
+
 const Login: React.FC = () => {
     const [username, setUsername] = React.useState('');
     const [password, setPassword] = React.useState('');
+    const [showPassword, setShowPassword] = React.useState(false);
+    const history = useHistory();
+
+    useEffect(() => {
+        const checkLogin = async () => {
+            const { value } = await Preferences.get({ key: 'user' });
+            if (value) {
+            const user = JSON.parse(value);
+            if (user.redirectTo) {
+                history.push(`/${user.redirectTo}`);
+            } else {
+                history.push('/Dashboard');
+            }
+            }
+        };
+
+        checkLogin();
+    });
 
     const doLogin = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        const result = await loginUser(username, password);
-        if (result["status"] == 200) {
-            alert('Login successful');
+        const result = await loginUser(BigInt(username), BigInt(password));
+        if (result["status"] === 200) {
+            const { user, redirectTo } = result.data;
+
+            await Preferences.set({
+                key: 'user',
+                value: JSON.stringify({ ...user, redirectTo })
+            });
+            history.push(`/${redirectTo}`);
+            
         } else if (result["status"] == 401) {
             alert('Invalid credentials');
         }
@@ -70,16 +99,29 @@ const Login: React.FC = () => {
                                     value={username}
                                     onIonChange={e => setUsername(e.detail.value!)}
                                 />
-                                <IonInput
-                                    className='ion-margin-top'
-                                    fill='outline'
-                                    label="Password"
-                                    labelPlacement='floating'
-                                    placeholder='Password'
-                                    type="password"
-                                    value={password}
-                                    onIonChange={e => setPassword(e.detail.value!)}
-                                />
+                                <div style={{ position: 'relative' }}>
+                                    <IonInput
+                                        className='ion-margin-top'
+                                        fill='outline'
+                                        label="Password"
+                                        labelPlacement='floating'
+                                        placeholder='Password'
+                                        type={showPassword ? 'text' : 'password'}
+                                        value={password}
+                                        onIonChange={e => setPassword(e.detail.value!)}
+                                    />
+                                    <IonButton 
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            setShowPassword(!showPassword);
+                                        }} 
+                                        fill="clear" 
+                                        style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-60%)', zIndex: 999 }}
+                                    >
+                                        <IonIcon icon={showPassword ? eyeOff : eye} />
+                                    </IonButton>
+                                </div>
                                 <div className="ion-text-center">
                                     <IonButton className='ion-margin-top' type='submit'>Login</IonButton>
                                 </div>

@@ -2,8 +2,6 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { IonApp, setupIonicReact } from '@ionic/react';
 
-import Login from './pages/Login';
-
 import '@ionic/react/css/core.css'; // 👈 Required Ionic styles
 import '@ionic/react/css/normalize.css';
 import '@ionic/react/css/structure.css';
@@ -15,6 +13,7 @@ import '@ionic/react/css/text-alignment.css';
 import '@ionic/react/css/text-transformation.css';
 import '@ionic/react/css/flex-utils.css';
 import '@ionic/react/css/display.css';
+import App from './App';
 
 setupIonicReact(); // 👈 Initializes Ionic React
 
@@ -23,7 +22,7 @@ const root = createRoot(container!);
 root.render(
   <React.StrictMode>
     <IonApp>
-      <Login />
+      <App />
     </IonApp>
   </React.StrictMode>
 );
