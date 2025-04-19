@@ -7,12 +7,14 @@ import {
   IonBackButton, IonSearchbar, IonList
 } from '@ionic/react';
 import { person, createOutline, ellipsisVertical } from 'ionicons/icons';
+import { getEmployees } from '../apis/employeeAPI';
 
 const AssignTask: React.FC = () => {
   const [department, setDepartment] = useState('');
   const [taskHead, setTaskHead] = useState('');
   const [task, setTask] = useState('');
-  const [assignTo, setAssignTo] = useState('');
+  const [assignTo, setAssignTo] = useState<string[]>([]);
+  const [employeeInput, setEmployeeInput] = useState('');
   const [assignBy, setAssignBy] = useState('');
   const [priority, setPriority] = useState('');
   const [fromDate, setFromDate] = useState('');
@@ -28,6 +30,9 @@ const AssignTask: React.FC = () => {
   ];
   const [showDepartmentModal, setShowDepartmentModal] = useState(false);
   const [filteredDepartments, setFilteredDepartments] = useState(departments);
+  const [employees, setEmployees] = useState<{ id: number; name: string }[]>([]);
+  const [filteredEmployees, setFilteredEmployees] = useState<{ id: number; name: string }[]>([]);
+  const [showEmployeeSuggestions, setShowEmployeeSuggestions] = useState(false);
 
   const formatDate = (value: string) => {
     return new Date(value).toLocaleDateString('en-GB'); // dd/mm/yyyy
@@ -97,12 +102,72 @@ const AssignTask: React.FC = () => {
           <IonItem>
             <IonLabel position="stacked">Assign To</IonLabel>
             <IonInput
-              value={assignTo}
-              onIonChange={e => setAssignTo(e.detail.value!)}
-              placeholder="User 1, User 2"
+              value={employeeInput}
+              onIonInput={async e => {
+                const value = e.detail.value!;
+                setEmployeeInput(value);
+
+                // Fetch employees if not already available
+                if (employees.length === 0) {
+                  //sessionStorage.removeItem('employeeData');
+                  try {
+                    const cached = sessionStorage.getItem('employeeData');
+                    let data;
+                    if (cached) {
+                      data = JSON.parse(cached);
+                    } else {
+                      data = await getEmployees();
+                      //console.log(JSON.stringify(data));
+                      sessionStorage.setItem('employeeData', JSON.stringify(data));
+                    }
+                    setEmployees(data);
+                    console.log("Fetched employees:", data); // Debugging
+                  } catch (error) {
+                    console.error("Error fetching employees:", error);
+                  }
+                }
+
+                // Filter employees based on input
+                const filtered = employees.filter(emp =>
+                  emp.name && emp.name.toLowerCase().includes(value.toLowerCase())
+                );
+                setFilteredEmployees(filtered);
+
+                // Show suggestions only if there are matches and input is not empty
+                setShowEmployeeSuggestions(value.trim().length > 0 && filtered.length > 0);
+              }}
+              placeholder="Type to search employees"
             />
             <IonIcon slot="end" icon={person} />
           </IonItem>
+
+          {showEmployeeSuggestions && filteredEmployees.length > 0 && (
+            <IonList style={{ maxHeight: '150px', overflowY: 'auto' }}>
+              {filteredEmployees.map((emp: { id: number; name: string }) => (
+                <IonItem
+                  key={emp.id}
+                  button
+                  onClick={() => {
+                    if (!assignTo.includes(emp.name)) {
+                      setAssignTo(prev => [...prev, emp.name]);
+                    }
+                    setEmployeeInput('');
+                    setShowEmployeeSuggestions(false);
+                  }}
+                >
+                  {emp.name}
+                </IonItem>
+              ))}
+            </IonList>
+          )}
+          <div style={{ marginTop: '8px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            {assignTo.map(name => (
+              <IonButton key={name} size="small" color="medium" fill="outline"
+                onClick={() => setAssignTo(prev => prev.filter(n => n !== name))}>
+                {name} &times;
+              </IonButton>
+            ))}
+          </div>
 
           <IonItem>
             <IonLabel position="stacked">Assign By</IonLabel>
