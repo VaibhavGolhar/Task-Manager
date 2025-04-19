@@ -4,7 +4,7 @@ import {
   IonItem, IonLabel, IonInput, IonButton, IonDatetime, IonSelect, IonSelectOption,
   IonTextarea, IonIcon, IonModal,
   IonButtons,
-  IonBackButton
+  IonBackButton, IonSearchbar, IonList
 } from '@ionic/react';
 import { person, createOutline, ellipsisVertical } from 'ionicons/icons';
 
@@ -20,6 +20,14 @@ const AssignTask: React.FC = () => {
   const [estHours, setEstHours] = useState('');
   const [showFromModal, setShowFromModal] = useState(false);
   const [showToModal, setShowToModal] = useState(false);
+  const departments = [
+    "Accounts and Finances", "Agriculture HNT", "Instrument", "Agriculture",
+    "Purchase", "Production", "General", "Environment", "Electrical",
+    "Engineering", "Education", "Distillery", "Co_Gen", "Civil",
+    "Information Technology", "Secretarial", "Marketing and Sales"
+  ];
+  const [showDepartmentModal, setShowDepartmentModal] = useState(false);
+  const [filteredDepartments, setFilteredDepartments] = useState(departments);
 
   const formatDate = (value: string) => {
     return new Date(value).toLocaleDateString('en-GB'); // dd/mm/yyyy
@@ -61,13 +69,9 @@ const AssignTask: React.FC = () => {
       <IonContent className="ion-padding">
         <div style={{ backgroundColor: '#d6eaff', borderRadius: '12px', padding: '16px' }}>
 
-          <IonItem>
+          <IonItem button onClick={() => setShowDepartmentModal(true)}>
             <IonLabel position="stacked">Department</IonLabel>
-            <IonInput
-              value={department}
-              onIonChange={e => setDepartment(e.detail.value!)}
-              placeholder="IT/Technical/QA"
-            />
+            <IonInput value={department} placeholder="Select Department" readonly />
             <IonIcon slot="end" icon={createOutline} />
           </IonItem>
 
@@ -165,6 +169,40 @@ const AssignTask: React.FC = () => {
                 setShowToModal(false);
               }}
             />
+          </IonModal>
+
+          {/* Department Selection Modal */}
+          <IonModal isOpen={showDepartmentModal} onDidDismiss={() => setShowDepartmentModal(false)}>
+            <IonHeader>
+              <IonToolbar>
+                <IonTitle>Select Department</IonTitle>
+              </IonToolbar>
+            </IonHeader>
+            <IonContent>
+              <IonSearchbar
+                placeholder="Search Departments"
+                onIonInput={e => {
+                  const query = e.detail.value!.toLowerCase();
+                  setFilteredDepartments(
+                    departments.filter(dep => dep.toLowerCase().includes(query))
+                  );
+                }}
+              />
+              <IonList>
+                {filteredDepartments.map(dep => (
+                  <IonItem
+                    key={dep}
+                    button
+                    onClick={() => {
+                      setDepartment(dep);
+                      setShowDepartmentModal(false);
+                    }}
+                  >
+                    {dep}
+                  </IonItem>
+                ))}
+              </IonList>
+            </IonContent>
           </IonModal>
 
           <IonItem>

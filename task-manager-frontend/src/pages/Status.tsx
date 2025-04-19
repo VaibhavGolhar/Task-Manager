@@ -3,10 +3,12 @@ import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
   IonSegment, IonSegmentButton, IonLabel, IonCard, IonCardHeader,
   IonCardTitle, IonCardContent, IonButton, IonButtons,
-  IonBackButton
+  IonBackButton,
+  IonIcon
 } from '@ionic/react';
 import { useHistory } from 'react-router-dom'; // Import useHistory
 import { Preferences } from '@capacitor/preferences';
+import { logOutOutline } from 'ionicons/icons';
 
 type Task = {
   id: number;
@@ -46,13 +48,15 @@ const TaskStatus: React.FC = () => {
                 <IonBackButton />
             </IonButtons>
           <IonTitle>Status</IonTitle>
-          <IonButtons slot="end">
+            <IonButtons slot="end">
             <IonButton onClick={() => history.push('/AssignTask')}>+ Assign Task</IonButton>
             <IonButton onClick={async () => {
-                await Preferences.remove({ key: 'user' });
-                history.replace('/login'); 
-                }}>Logout</IonButton>
-          </IonButtons>
+              await Preferences.remove({ key: 'user' });
+              history.replace('/login'); 
+              }}>
+              <IonIcon icon={logOutOutline} />
+            </IonButton>
+            </IonButtons>
         </IonToolbar>
       </IonHeader>
 
