@@ -15,8 +15,10 @@ const AssignTask: React.FC = () => {
   const [taskHead, setTaskHead] = useState('');
   const [task, setTask] = useState('');
   const [assignTo, setAssignTo] = useState<string[]>([]);
+  const [assignToId, setAssignToId] = useState<number[]>([]);
   const [employeeInput, setEmployeeInput] = useState('');
   const [assignBy, setAssignBy] = useState('');
+  const [assignById, setAssignById] = useState('');
   const [priority, setPriority] = useState('');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
@@ -40,10 +42,30 @@ const AssignTask: React.FC = () => {
       const { value } = await Preferences.get({ key: 'user' });
       if (value) {
         const user = JSON.parse(value);
-        setAssignBy(user.employeeName); // Extract `employeeName` from the stored user object
+        setAssignBy(user.employeeName);
+        setAssignById(user.empId); // Extract `employeeName` from the stored user object
       }
     };
 
+    const fetchEmployees = async () => {
+      try {
+        const cached = sessionStorage.getItem('employeeData');
+        let data;
+        if (cached) {
+          data = JSON.parse(cached);
+        } else {
+          data = await getEmployees();
+          //console.log(JSON.stringify(data));
+          sessionStorage.setItem('employeeData', JSON.stringify(data));
+        }
+        setEmployees(data);
+        console.log("Fetched employees:", data); // Debugging
+      } catch (error) {
+        console.error("Error fetching employees:", error);
+      }
+    }
+
+    fetchEmployees();
     fetchUserInfo();
   }, []);
 
@@ -56,8 +78,8 @@ const AssignTask: React.FC = () => {
       department,
       taskHead,
       task,
-      assignTo,
-      assignBy,
+      assignToId,
+      assignById,
       priority,
       fromDate,
       toDate,
@@ -67,10 +89,8 @@ const AssignTask: React.FC = () => {
     // Add API call or state update here
   };
 
-  const handleClose = () => {
-    console.log("Form Closed");
-  };
-
+  
+  
   return (
     <IonPage>
       <IonHeader>
@@ -163,6 +183,7 @@ const AssignTask: React.FC = () => {
                   onClick={() => {
                     if (!assignTo.includes(emp.name)) {
                       setAssignTo(prev => [...prev, emp.name]);
+                      setAssignToId(prev => [...prev, emp.id]);
                     }
                     setEmployeeInput('');
                     setShowEmployeeSuggestions(false);
@@ -176,7 +197,10 @@ const AssignTask: React.FC = () => {
           <div style={{ marginTop: '8px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
             {assignTo.map(name => (
               <IonButton key={name} size="small" color="medium" fill="outline"
-                onClick={() => setAssignTo(prev => prev.filter(n => n !== name))}>
+                onClick={() => {
+                  setAssignTo(prev => prev.filter(n => n !== name));
+                  setAssignToId(prev => prev.filter(id => id !== assignToId[assignTo.indexOf(name)]));
+                  }}>
                 {name} &times;
               </IonButton>
             ))}
@@ -298,7 +322,7 @@ const AssignTask: React.FC = () => {
           <IonButton expand="block" color="success" onClick={handleSubmit}>
             Submit
           </IonButton>
-          <IonButton expand="block" color="danger" onClick={handleClose}>
+          <IonButton expand="block" color="danger" routerDirection="back" routerLink="/Status">
             Close
           </IonButton>
         </div>

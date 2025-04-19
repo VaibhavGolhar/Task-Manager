@@ -53,6 +53,7 @@ const TaskStatus: React.FC = () => {
             <IonButton onClick={async () => {
               await Preferences.remove({ key: 'user' });
               history.replace('/login'); 
+              sessionStorage.clear();
               }}>
               <IonIcon icon={logOutOutline} />
             </IonButton>
