@@ -18,6 +18,7 @@ app.use(cors());
 app.use(express.json());
 app.use('/api/login', require('./routes/loginRoutes'));
 app.use('/api/employees', require('./routes/employeesRoutes'));
+app.use('/api/assignTask', require('./routes/assignTaskRoutes'));
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);

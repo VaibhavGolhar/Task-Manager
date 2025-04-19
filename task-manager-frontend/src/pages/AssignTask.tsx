@@ -8,6 +8,7 @@ import {
 } from '@ionic/react';
 import { person, createOutline, ellipsisVertical } from 'ionicons/icons';
 import { getEmployees } from '../apis/employeeAPI';
+import { assignTask } from '../apis/assignTaskAPI';
 import { Preferences } from '@capacitor/preferences';
 
 const AssignTask: React.FC = () => {
@@ -73,20 +74,29 @@ const AssignTask: React.FC = () => {
     return new Date(value).toLocaleDateString('en-GB'); // dd/mm/yyyy
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const formData = {
       department,
       taskHead,
       task,
-      assignToId,
-      assignById,
+      assignToId: assignToId.map(id => id.toString()), // send as string[]
+      assignById: assignById.toString(), // send as string
       priority,
       fromDate,
       toDate,
-      estHours
+      estHours // convert to BigInt as required by API
     };
-    console.log("Task Submitted:", formData);
-    // Add API call or state update here
+  
+    console.log("Task Submitted:", {
+      ...formData,
+      estHours: estHours.toString() // Convert BigInt to string for logging
+    });
+  
+    const response = await assignTask(formData);
+    if (response.status === 201) {
+      alert('Task assigned successfully');
+      window.location.href = '/Status';
+    }
   };
 
   
