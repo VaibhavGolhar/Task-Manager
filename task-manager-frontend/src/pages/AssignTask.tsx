@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
   IonItem, IonLabel, IonInput, IonButton, IonDatetime, IonSelect, IonSelectOption,
@@ -8,6 +8,7 @@ import {
 } from '@ionic/react';
 import { person, createOutline, ellipsisVertical } from 'ionicons/icons';
 import { getEmployees } from '../apis/employeeAPI';
+import { Preferences } from '@capacitor/preferences';
 
 const AssignTask: React.FC = () => {
   const [department, setDepartment] = useState('');
@@ -33,6 +34,18 @@ const AssignTask: React.FC = () => {
   const [employees, setEmployees] = useState<{ id: number; name: string }[]>([]);
   const [filteredEmployees, setFilteredEmployees] = useState<{ id: number; name: string }[]>([]);
   const [showEmployeeSuggestions, setShowEmployeeSuggestions] = useState(false);
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      const { value } = await Preferences.get({ key: 'user' });
+      if (value) {
+        const user = JSON.parse(value);
+        setAssignBy(user.employeeName); // Extract `employeeName` from the stored user object
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
 
   const formatDate = (value: string) => {
     return new Date(value).toLocaleDateString('en-GB'); // dd/mm/yyyy
@@ -172,9 +185,8 @@ const AssignTask: React.FC = () => {
           <IonItem>
             <IonLabel position="stacked">Assign By</IonLabel>
             <IonInput
-              value={assignBy}
-              onIonChange={e => setAssignBy(e.detail.value!)}
-              placeholder="MD/HoD/GM"
+              value={assignBy || 'Loading...'} // Show "Loading..." until the user's name is fetched
+              readonly // Make the field unchangeable
             />
             <IonIcon slot="end" icon={person} />
           </IonItem>
