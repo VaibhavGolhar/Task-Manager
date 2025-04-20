@@ -37,11 +37,24 @@ const Departments: React.FC = () => {
   const history = useHistory();
 
   const goToDepartment = async (label: string) => {
-    const res = await getDepartmentEmployees(label);
-    history.push({
-      pathname: '/DepartmentEmployees',
-      state: { employees: res }
-    });
+    const storedEmployees = sessionStorage.getItem(`${label}Employees`);
+    
+    if (storedEmployees) {
+      // If employees exist in session storage, use them
+      const employees = JSON.parse(storedEmployees);
+      history.push({
+        pathname: '/DepartmentEmployees',
+        state: { employees }
+      });
+    } else {
+      // If not, fetch employees and store them in session storage
+      const res = await getDepartmentEmployees(label);
+      sessionStorage.setItem(`${label}Employees`, JSON.stringify(res));
+      history.push({
+        pathname: '/DepartmentEmployees',
+        state: { employees: res }
+      });
+    }
   };
 
   return (
@@ -58,6 +71,7 @@ const Departments: React.FC = () => {
             <IonButton onClick={() => history.push('/AssignTask')}>+ Assign Task</IonButton>
             <IonButton onClick={async () => {
                 await Preferences.remove({ key: 'user' });
+                sessionStorage.clear();
                 history.replace('/login'); 
                 }}>Logout</IonButton>
           </IonButtons>
