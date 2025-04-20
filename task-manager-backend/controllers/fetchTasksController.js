@@ -23,7 +23,7 @@ const fetchTasks = asyncHandler(async (req, res) => {
             `);
 
         const tasks = result.recordset;
-        console.log(tasks);
+        //console.log(tasks);
         if (tasks.length === 0) {
             res.status(404).json({ message: "No tasks found." });
             return;

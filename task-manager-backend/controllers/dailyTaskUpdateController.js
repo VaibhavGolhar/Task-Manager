@@ -7,11 +7,11 @@ const dailyTaskUpdate = asyncHandler(async (req, res) => {
         const { userId, taskId, hours, remark } = req.body;
         const uploadedFile = req.file;
 
-        console.log("User ID:", userId);
+        /* console.log("User ID:", userId);
         console.log("Task ID:", taskId);
         console.log("Hours:", hours);
         console.log("Remark:", remark);
-        console.log("Uploaded file info:", uploadedFile);
+        console.log("Uploaded file info:", uploadedFile); */
 
         // Prepare the file path or null if no file is uploaded
         const filePath = uploadedFile ? uploadedFile.path : null;

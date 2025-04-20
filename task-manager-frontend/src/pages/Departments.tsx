@@ -1,15 +1,17 @@
 import React from 'react';
 import {
-  IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonBackButton,
+  IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons,
   IonGrid, IonRow, IonCol, IonButton, IonIcon
 } from '@ionic/react';
 import {
   calendarOutline, leafOutline, buildOutline, schoolOutline, heartOutline,
   flaskOutline, constructOutline, businessOutline, peopleOutline, earthOutline,
-  hammerOutline, gitNetworkOutline, laptopOutline, searchOutline
+  hammerOutline, gitNetworkOutline, laptopOutline, searchOutline,
+  arrowBack
 } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
 import { Preferences } from '@capacitor/preferences';
+import { getDepartmentEmployees } from '../apis/fetchDepartmentEmployeesAPI';
 
 const departments = [
   { label: "Accounts and Finances", icon: calendarOutline },
@@ -34,17 +36,23 @@ const departments = [
 const Departments: React.FC = () => {
   const history = useHistory();
 
-  const goToDepartmentTasks = (label: string) => {
-    history.push(`/tasks/${encodeURIComponent(label)}`);
+  const goToDepartment = async (label: string) => {
+    const res = await getDepartmentEmployees(label);
+    history.push({
+      pathname: '/DepartmentEmployees',
+      state: { employees: res }
+    });
   };
 
   return (
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonButtons slot="start">
-            <IonBackButton />
-          </IonButtons>
+        <IonButtons slot="start">
+          <IonButton onClick={() => history.push('/Status')}>
+              <IonIcon icon={arrowBack} />
+          </IonButton>
+        </IonButtons>
           <IonTitle>Departments</IonTitle>
           <IonButtons slot="end">
             <IonButton onClick={() => history.push('/AssignTask')}>+ Assign Task</IonButton>
@@ -64,7 +72,7 @@ const Departments: React.FC = () => {
                 <IonButton
                   expand="block"
                   fill="clear"
-                  onClick={() => goToDepartmentTasks(dept.label)}
+                  onClick={() => goToDepartment(dept.label)}
                   style={{
                     borderRadius: '20px',
                     textTransform: 'none',

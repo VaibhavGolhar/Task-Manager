@@ -4,7 +4,7 @@ const pool = require('../config/dbConnection');
 
 const fetchEmployees = asyncHandler(async (req, res) => {
     try {
-      console.log('Fetching employees...');
+      //console.log('Fetching employees...');
       const result = await pool.query('SELECT EmployeeId, EmployeeName FROM dbo.EmployeeMaster;');
       
       // Get the actual rows from the result object
@@ -14,7 +14,7 @@ const fetchEmployees = asyncHandler(async (req, res) => {
         id: emp.EmployeeId,
         name: emp.EmployeeName
       }));
-      console.log('Employees fetched successfully:', employees);
+      //console.log('Employees fetched successfully:', employees);
       res.status(200).json(employees);
     } catch (error) {
       console.error('Error fetching employees:', error);

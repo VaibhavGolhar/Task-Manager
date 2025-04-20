@@ -22,6 +22,7 @@ import EmployeeDashboard from './pages/EmployeeDashboard';
 import Status from './pages/Status';
 import AssignTask from './pages/AssignTask';
 import TaskUpdation from './pages/TaskUpdation';
+import DepartmentEmployees from './pages/DepartmentEmployees';
 
 setupIonicReact();
 
@@ -36,6 +37,7 @@ const App: React.FC = () => (
         <Route path="/Status" component={Status} exact={true} />
         <Route path="/AssignTask" component={AssignTask} exact={true} />
         <Route path="/TaskUpdation" component={TaskUpdation} exact={true} />
+        <Route path='/DepartmentEmployees' component={DepartmentEmployees} exact={true} />
         <Redirect exact from="/" to="/Login" />
       </IonRouterOutlet>
     </BrowserRouter>

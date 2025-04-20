@@ -20,7 +20,7 @@ const assignTask = asyncHandler(async (req, res) => {
       
       const fromDateOnly = new Date(fromDateObj.toISOString().split('T')[0]);
       const toDateOnly = new Date(toDateObj.toISOString().split('T')[0]);
-      console.log(fromDateOnly +", " + typeof(fromDateOnly));
+      //console.log(fromDateOnly +", " + typeof(fromDateOnly));
 
       const assignByBigInt = BigInt(AssignById);
 
