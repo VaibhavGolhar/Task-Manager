@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
   IonSegment, IonSegmentButton, IonLabel, IonCard, IonCardHeader,
@@ -8,33 +8,59 @@ import {
 } from '@ionic/react';
 import { useHistory } from 'react-router-dom'; // Import useHistory
 import { Preferences } from '@capacitor/preferences';
-import { logOutOutline } from 'ionicons/icons';
+import { logOutOutline, refresh } from 'ionicons/icons';
+import { fetchTasks } from '../apis/fetchTasksAPI';
 
 type Task = {
-  id: number;
-  title: string;
-  desc?: string;
-  assignedTo?: string;
-  status: 'new' | 'inProgress' | 'submitted' | 'completed';
-  date: string;
+  taskId: string;
+  department: string;
+  taskHead: string;
+  task: string;
+  assignToId: string;
+  assignById: string;
+  priority: string;
+  fromDate: string;
+  toDate: string;
+  estHours: string;
+  status:string;
 };
 
 const TaskStatus: React.FC = () => {
   const history = useHistory(); // Hook for navigation
 
-  const [tasks, setTasks] = useState<Task[]>([
-    { id: 1, title: 'Task One', status: 'new', date: '24/03 - 26/03' },
-    { id: 2, title: 'Task Two', status: 'new', date: '25/03 - 28/03' },
-    { id: 3, title: 'Task Three', status: 'submitted', date: '24/03 - 26/03', desc: 'Desc here', assignedTo: 'HOD' },
-    { id: 4, title: 'Task Four', status: 'inProgress', date: '26/03 - 29/03' },
-    { id: 5, title: 'Task Five', status: 'completed', date: '22/03 - 24/03' },
-  ]);
+  const [tasks, setTasks] = useState<Task[]>([]);
 
   const [selectedStatus, setSelectedStatus] = useState<'new' | 'inProgress' | 'submitted' | 'completed'>('new');
 
+  useEffect(() => {
+    const loadTasks = async () => {
+      try {
+        const storedTasks = sessionStorage.getItem('tasks');
+        if (storedTasks) {
+          setTasks(JSON.parse(storedTasks) as Task[]);
+        } else {
+          const pref = await Preferences.get({ key: 'user' });
+          if (pref.value) {
+            const user = JSON.parse(pref.value);
+            const empId = user.empId.toString();
+            const fetchedTasks = await fetchTasks(empId);
+            console.log('Fetched tasks:', fetchedTasks);
+            setTasks(fetchedTasks as unknown as Task[]);
+            sessionStorage.setItem('tasks', JSON.stringify(fetchedTasks));
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load tasks:', err);
+      }
+      //console.log('Tasks loaded:', tasks);
+    };
+
+    loadTasks();
+  }, []);
+
   const updateStatus = (id: number, newStatus: Task['status']) => {
     setTasks(prev =>
-      prev.map(task => (task.id === id ? { ...task, status: newStatus } : task))
+      prev.map(task => (parseInt(task.taskId) === id ? { ...task, status: newStatus } : task))
     );
   };
 
@@ -48,7 +74,24 @@ const TaskStatus: React.FC = () => {
                 <IonBackButton />
             </IonButtons>
           <IonTitle>Status</IonTitle>
-            <IonButtons slot="end">
+          <IonButtons slot="end">
+            <IonButton onClick={async () => {
+              try {
+                const pref = await Preferences.get({ key: 'user' });
+                if (pref.value) {
+                  const user = JSON.parse(pref.value);
+                  const empId = user.empId.toString();
+                  const fetchedTasks = await fetchTasks(empId);
+                  setTasks(fetchedTasks as unknown as Task[]);
+                  //console.log('Fetched tasks:', fetchedTasks);
+                  sessionStorage.setItem('tasks', JSON.stringify(fetchedTasks));
+                }
+              } catch (err) {
+                console.error('Failed to refresh tasks:', err);
+              }
+            }}>
+              <IonIcon icon={refresh} />
+            </IonButton>
             <IonButton onClick={() => history.push('/AssignTask')}>+ Assign Task</IonButton>
             <IonButton onClick={async () => {
               await Preferences.remove({ key: 'user' });
@@ -57,14 +100,14 @@ const TaskStatus: React.FC = () => {
               }}>
               <IonIcon icon={logOutOutline} />
             </IonButton>
-            </IonButtons>
+          </IonButtons>
         </IonToolbar>
       </IonHeader>
 
       <IonContent className={`ion-padding status-${selectedStatus}`}>
 
         <div className="status-buttons ion-text-center ion-margin-bottom">
-          <IonSegment value={selectedStatus} onIonChange={(e: CustomEvent) => setSelectedStatus(e.detail.value as Task['status'])}>
+          <IonSegment value={selectedStatus} onIonChange={(e: CustomEvent) => setSelectedStatus(e.detail.value as 'new' | 'inProgress' | 'submitted' | 'completed')}>
             <IonSegmentButton value="new"><IonLabel>New Tasks ({tasks.filter(t => t.status === 'new').length})</IonLabel></IonSegmentButton>
             <IonSegmentButton value="inProgress"><IonLabel>In Process ({tasks.filter(t => t.status === 'inProgress').length})</IonLabel></IonSegmentButton>
             <IonSegmentButton value="submitted"><IonLabel>Submitted ({tasks.filter(t => t.status === 'submitted').length})</IonLabel></IonSegmentButton>
@@ -73,32 +116,31 @@ const TaskStatus: React.FC = () => {
         </div>
 
         {filteredTasks.map(task => (
-          <IonCard key={task.id} color="light">
+          <IonCard key={task.taskId} color="light">
             <IonCardHeader>
-              <IonCardTitle>{task.title}</IonCardTitle>
-              <p>{task.date}</p>
+              <IonCardTitle>{task.taskHead}</IonCardTitle>
+              <p>{task.fromDate}</p>
             </IonCardHeader>
             <IonCardContent>
-              {task.desc && <p><strong>Description:</strong> {task.desc}</p>}
-              {task.assignedTo && <p><strong>Assigned to:</strong> {task.assignedTo}</p>}
+              {task.task && <p><strong>Description:</strong> {task.task}</p>}
 
               {/* Buttons based on status */}
               {task.status === 'new' && (
                 <IonButtons>
-                  <IonButton onClick={() => updateStatus(task.id, 'inProgress')}>Start</IonButton>
+                  <IonButton onClick={() => updateStatus(parseInt(task.taskId), 'inProgress')}>Start</IonButton>
                   <IonButton color="medium" fill="outline">Close</IonButton>
                 </IonButtons>
               )}
               {task.status === 'inProgress' && (
                 <IonButtons>
-                  <IonButton onClick={() => updateStatus(task.id, 'submitted')}>Submit</IonButton>
+                  <IonButton onClick={() => updateStatus(parseInt(task.taskId), 'submitted')}>Submit</IonButton>
                   <IonButton color="medium" fill="outline">Close</IonButton>
                 </IonButtons>
               )}
               {task.status === 'submitted' && (
                 <IonButtons>
-                  <IonButton onClick={() => updateStatus(task.id, 'completed')}>Mark Completed</IonButton>
-                  <IonButton onClick={() => updateStatus(task.id, 'inProgress')} color="warning">Unsubmit</IonButton>
+                  <IonButton onClick={() => updateStatus(parseInt(task.taskId), 'completed')}>Mark Completed</IonButton>
+                  <IonButton onClick={() => updateStatus(parseInt(task.taskId), 'inProgress')} color="warning">Unsubmit</IonButton>
                 </IonButtons>
               )}
               {task.status === 'completed' && (
