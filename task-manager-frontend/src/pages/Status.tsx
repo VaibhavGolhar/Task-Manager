@@ -18,6 +18,8 @@ type Task = {
   task: string;
   assignToId: string;
   assignById: string;
+  assignByName: string;
+  assignByDesignation: string;
   priority: string;
   fromDate: string;
   toDate: string;
@@ -82,6 +84,7 @@ const TaskStatus: React.FC = () => {
                   const fetchedTasks = await fetchTasks(empId);
                   setTasks(fetchedTasks as unknown as Task[]);
                   sessionStorage.setItem('tasks', JSON.stringify(fetchedTasks));
+                  //console.log('Tasks refreshed:', fetchedTasks);
                 }
               } catch (err) {
                 console.error('Failed to refresh tasks:', err);
@@ -116,7 +119,7 @@ const TaskStatus: React.FC = () => {
             <IonCardHeader>
               <IonCardTitle>{task.taskHead}</IonCardTitle>
               <p>{task.fromDate}</p>
-              <p><strong>Assigned By:</strong> {task.assignById}</p>
+              <p><strong>Assigned By:</strong> {task.assignByName + ", " + task.assignByDesignation}</p>
             </IonCardHeader>
             <IonCardContent>
               {expandedTaskId === task.taskId && (

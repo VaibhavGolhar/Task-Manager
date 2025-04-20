@@ -15,8 +15,11 @@ const fetchTasks = asyncHandler(async (req, res) => {
         const result = await pool.request()
             .input('empIdBigInt', sql.BigInt, empIdBigInt)
             .query(`
-                SELECT * FROM TaskCreate_Header
-                WHERE AssignToId = @empIdBigInt;
+                SELECT T.*, E.EmployeeName AS AssignByName, D.Designation AS AssignByDesignation
+                FROM TaskCreate_Header T
+                JOIN EmployeeMaster E ON T.AssignById = E.EmployeeId
+                JOIN Designation D ON E.DesignationId = D.DesignationId
+                WHERE T.AssignToId = @empIdBigInt;
             `);
 
         const tasks = result.recordset;
@@ -35,6 +38,8 @@ const fetchTasks = asyncHandler(async (req, res) => {
             task: task.TaskDesc || '',
             assignToId: task.AssignToId?.toString() || '',
             assignById: task.AssignById?.toString() || '',
+            assignByName: task.AssignByName || '',
+            assignByDesignation: task.AssignByDesignation || '',
             priority: task.Priority?.toString() || '',
             fromDate: task.FromDate ? new Date(task.FromDate).toISOString().split('T')[0] : '',
             toDate: task.EndDate ? new Date(task.EndDate).toISOString().split('T')[0] : '',

@@ -9,6 +9,8 @@ type Task = {
     task: string;
     assignToId: string;
     assignById: string;
+    assignByName: string;
+    assignByDesignation: string;
     priority: string;
     fromDate: string;
     toDate: string;
