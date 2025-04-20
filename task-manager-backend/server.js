@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv').config();
 const pool = require('./config/dbConnection');
+const { dailyTaskUpdate } = require('./controllers/dailyTaskUpdateController');
+const upload = require('./middleware/uploadMiddleware');
 
 pool.connect()
   .then(() => console.log('Database connected.'))
@@ -21,6 +23,7 @@ app.use('/api/employees', require('./routes/employeesRoutes'));
 app.use('/api/assignTask', require('./routes/assignTaskRoutes'));
 app.use('/api/fetchTasks', require('./routes/fetchTasksRoutes'));
 app.use('/api/updateTask', require('./routes/updateTaskRoutes'));
+app.post('/api/dailyTaskUpdate', upload.single('file'), dailyTaskUpdate);
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);

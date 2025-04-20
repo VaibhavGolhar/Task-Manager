@@ -12,7 +12,7 @@ const assignTask = asyncHandler(async (req, res) => {
         Priority,
         fromDate,
         toDate,
-        estHours
+        EstimateHrs
       } = req.body;
 
       const fromDateObj = new Date(fromDate);
@@ -24,7 +24,7 @@ const assignTask = asyncHandler(async (req, res) => {
 
       const assignByBigInt = BigInt(AssignById);
 
-      const estHoursInt = parseInt(estHours);
+      const estHoursInt = parseInt(EstimateHrs);
 
       const assignToBigInts = AssignToId.map(id => BigInt(id));
 

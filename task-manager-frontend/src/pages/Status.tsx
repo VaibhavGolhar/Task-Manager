@@ -187,14 +187,28 @@ const TaskStatus: React.FC = () => {
                   )}
                   {task.status === 'inProgress' && (
                     <IonButtons>
-                      <IonButton
+                      {/* Submit Button */}
+                      {/* <IonButton
                         onClick={(e) => {
                           e.stopPropagation(); // Prevent click propagation
                           updateStatus(parseInt(task.taskId), 'submitted');
                         }}
                       >
                         Submit
+                      </IonButton> */}
+
+                      {/* Update Button */}
+                      <IonButton
+                        color="secondary"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent click propagation
+                          history.push(`/TaskUpdation?taskId=${task.taskId}`); // Redirect to TaskUpdation page with taskId as a query parameter
+                        }}
+                      >
+                        Update
                       </IonButton>
+
+                      {/* Close Button */}
                       <IonButton
                         color="medium"
                         fill="outline"

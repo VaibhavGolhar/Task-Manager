@@ -28,7 +28,7 @@ const fetchTasks = asyncHandler(async (req, res) => {
             res.status(404).json({ message: "No tasks found." });
             return;
         }
-
+        
         res.status(200).json({
             message: "Tasks fetched successfully",
             tasks: tasks.map(task => ({
