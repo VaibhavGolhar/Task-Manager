@@ -15,6 +15,13 @@ const assignTask = asyncHandler(async (req, res) => {
         estHours
       } = req.body;
 
+      const fromDateObj = new Date(fromDate);
+      const toDateObj = new Date(toDate);
+      
+      const fromDateOnly = new Date(fromDateObj.toISOString().split('T')[0]);
+      const toDateOnly = new Date(toDateObj.toISOString().split('T')[0]);
+      console.log(fromDateOnly +", " + typeof(fromDateOnly));
+
       const assignByBigInt = BigInt(AssignById);
 
       const estHoursInt = parseInt(estHours);
@@ -42,7 +49,7 @@ const assignTask = asyncHandler(async (req, res) => {
                        now.getSeconds().toString().padStart(2, '0');
         const Taskid = BigInt(assignByBigInt.toString() + dateStr + timeStr);
 
-
+        
         // Insert task into the database
         const poolConnection = await pool;
         const insertedTaskIds = [];
@@ -57,10 +64,8 @@ const assignTask = asyncHandler(async (req, res) => {
                 .input('AssignById', sql.BigInt, assignByBigInt)
                 .input('Priority', sql.Int, priorityMap[Priority.toLowerCase()])
                 .input('TaskCreateDate', sql.DateTime, currentDate)
-                .input('FromDate', sql.Date, fromDate)
-                .input('FromTime', sql.Time, fromDate)
-                .input('EndDate', sql.Date, toDate)
-                .input('EndTime', sql.Time, toDate)
+                .input('FromDate', sql.Date, fromDateOnly)
+                .input('EndDate', sql.Date, toDateOnly)
                 .input('EstimateHrs', sql.Int, estHoursInt)
                 .input('Remark', sql.NVarChar(300), Remark)
                 .input('ActualEndDate', sql.Date, null)
@@ -71,11 +76,11 @@ const assignTask = asyncHandler(async (req, res) => {
                 .query(`
                     INSERT INTO TaskCreate_Header (
                         TaskId, TaskTypeId, TaskDesc, DeptId, AssignToId, AssignById, Priority, 
-                        TaskCreateDate, FromDate, FromTime, EndDate, EndTime, EstimateHrs, 
+                        TaskCreateDate, FromDate, EndDate, EstimateHrs, 
                         Remark, ActualEndDate, ActualEndTime, CreatedBy, CreatedByDate, Status
                     ) VALUES (
                         @Taskid, @TaskTypeId, @TaskDesc, @DeptId, @AssignToId, @AssignById, @Priority, 
-                        @TaskCreateDate, @FromDate, @FromTime, @EndDate, @EndTime, @EstimateHrs, 
+                        @TaskCreateDate, @FromDate, @EndDate, @EstimateHrs, 
                         @Remark, @ActualEndDate, @ActualEndTime, @CreatedBy, @CreatedByDate, @Status
                     )
                 `);

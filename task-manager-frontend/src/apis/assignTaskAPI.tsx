@@ -18,6 +18,7 @@ export const assignTask = async (req: task): Promise<{status:number, taskId : nu
   const { department, taskHead, task, assignToId, assignById, priority, fromDate, toDate, estHours } = req;
   const insertedTaskIds = [];
 
+
   try{
 
       const result = await axios.post(`${API_BASE_URL}/api/assignTask`, {
@@ -28,9 +29,9 @@ export const assignTask = async (req: task): Promise<{status:number, taskId : nu
           AssignById: assignById,
           Priority: priority.toLowerCase(),
           TaskCreateDate: new Date(),
-          FromDate: fromDate,
-          FromTime: fromDate,
-          EndDate: toDate,
+          fromDate: fromDate,
+          FromTime: toDate,
+          toDate: toDate,
           EndTime: toDate,
           EstimateHrs: estHours,
           Remark: taskHead,

@@ -118,7 +118,7 @@ const TaskStatus: React.FC = () => {
           <IonCard key={task.taskId} color="light" onClick={() => setExpandedTaskId(expandedTaskId === task.taskId ? null : task.taskId)}>
             <IonCardHeader>
               <IonCardTitle>{task.taskHead}</IonCardTitle>
-              <p>{task.fromDate}</p>
+              <p>{"From: " + task.fromDate} <br /> {"To: " + task.toDate}</p>
               <p><strong>Assigned By:</strong> {task.assignByName + ", " + task.assignByDesignation}</p>
             </IonCardHeader>
             <IonCardContent>
