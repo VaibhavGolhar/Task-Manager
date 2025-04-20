@@ -264,6 +264,7 @@ const AssignTask: React.FC = () => {
           <IonModal isOpen={showFromModal} onDidDismiss={() => setShowFromModal(false)}>
             <IonDatetime
               presentation="date"
+              min={new Date().toISOString().split('T')[0]} // Set the minimum date to today's date
               onIonChange={e => {
                 setFromDate(Array.isArray(e.detail.value) ? e.detail.value[0] : e.detail.value!);
                 setShowFromModal(false);
@@ -275,6 +276,7 @@ const AssignTask: React.FC = () => {
           <IonModal isOpen={showToModal} onDidDismiss={() => setShowToModal(false)}>
             <IonDatetime
               presentation="date"
+              min={new Date().toISOString().split('T')[0]} 
               onIonChange={e => {
                 setToDate(Array.isArray(e.detail.value) ? e.detail.value[0] : e.detail.value!);
                 setShowToModal(false);
