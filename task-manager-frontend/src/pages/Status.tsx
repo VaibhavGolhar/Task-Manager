@@ -6,7 +6,7 @@ import {
   IonBackButton,
   IonIcon
 } from '@ionic/react';
-import { useHistory } from 'react-router-dom'; // Import useHistory
+import { useHistory } from 'react-router-dom';
 import { Preferences } from '@capacitor/preferences';
 import { logOutOutline, refresh } from 'ionicons/icons';
 import { fetchTasks } from '../apis/fetchTasksAPI';
@@ -22,15 +22,15 @@ type Task = {
   fromDate: string;
   toDate: string;
   estHours: string;
-  status:string;
+  status: string;
 };
 
 const TaskStatus: React.FC = () => {
-  const history = useHistory(); // Hook for navigation
+  const history = useHistory();
 
   const [tasks, setTasks] = useState<Task[]>([]);
-
   const [selectedStatus, setSelectedStatus] = useState<'new' | 'inProgress' | 'submitted' | 'completed'>('new');
+  const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
 
   useEffect(() => {
     const loadTasks = async () => {
@@ -44,7 +44,6 @@ const TaskStatus: React.FC = () => {
             const user = JSON.parse(pref.value);
             const empId = user.empId.toString();
             const fetchedTasks = await fetchTasks(empId);
-            console.log('Fetched tasks:', fetchedTasks);
             setTasks(fetchedTasks as unknown as Task[]);
             sessionStorage.setItem('tasks', JSON.stringify(fetchedTasks));
           }
@@ -52,7 +51,6 @@ const TaskStatus: React.FC = () => {
       } catch (err) {
         console.error('Failed to load tasks:', err);
       }
-      //console.log('Tasks loaded:', tasks);
     };
 
     loadTasks();
@@ -70,9 +68,9 @@ const TaskStatus: React.FC = () => {
     <IonPage>
       <IonHeader>
         <IonToolbar>
-             <IonButtons slot="start">
-                <IonBackButton />
-            </IonButtons>
+          <IonButtons slot="start">
+            <IonBackButton />
+          </IonButtons>
           <IonTitle>Status</IonTitle>
           <IonButtons slot="end">
             <IonButton onClick={async () => {
@@ -83,7 +81,6 @@ const TaskStatus: React.FC = () => {
                   const empId = user.empId.toString();
                   const fetchedTasks = await fetchTasks(empId);
                   setTasks(fetchedTasks as unknown as Task[]);
-                  //console.log('Fetched tasks:', fetchedTasks);
                   sessionStorage.setItem('tasks', JSON.stringify(fetchedTasks));
                 }
               } catch (err) {
@@ -95,9 +92,9 @@ const TaskStatus: React.FC = () => {
             <IonButton onClick={() => history.push('/AssignTask')}>+ Assign Task</IonButton>
             <IonButton onClick={async () => {
               await Preferences.remove({ key: 'user' });
-              history.replace('/login'); 
+              history.replace('/login');
               sessionStorage.clear();
-              }}>
+            }}>
               <IonIcon icon={logOutOutline} />
             </IonButton>
           </IonButtons>
@@ -105,7 +102,6 @@ const TaskStatus: React.FC = () => {
       </IonHeader>
 
       <IonContent className={`ion-padding status-${selectedStatus}`}>
-
         <div className="status-buttons ion-text-center ion-margin-bottom">
           <IonSegment value={selectedStatus} onIonChange={(e: CustomEvent) => setSelectedStatus(e.detail.value as 'new' | 'inProgress' | 'submitted' | 'completed')}>
             <IonSegmentButton value="new"><IonLabel>New Tasks ({tasks.filter(t => t.status === 'new').length})</IonLabel></IonSegmentButton>
@@ -116,13 +112,16 @@ const TaskStatus: React.FC = () => {
         </div>
 
         {filteredTasks.map(task => (
-          <IonCard key={task.taskId} color="light">
+          <IonCard key={task.taskId} color="light" onClick={() => setExpandedTaskId(expandedTaskId === task.taskId ? null : task.taskId)}>
             <IonCardHeader>
               <IonCardTitle>{task.taskHead}</IonCardTitle>
               <p>{task.fromDate}</p>
+              <p><strong>Assigned By:</strong> {task.assignById}</p>
             </IonCardHeader>
             <IonCardContent>
-              {task.task && <p><strong>Description:</strong> {task.task}</p>}
+              {expandedTaskId === task.taskId && (
+                <p><strong>Description:</strong> {task.task}</p>
+              )}
 
               {/* Buttons based on status */}
               {task.status === 'new' && (
@@ -149,7 +148,6 @@ const TaskStatus: React.FC = () => {
             </IonCardContent>
           </IonCard>
         ))}
-
       </IonContent>
     </IonPage>
   );
