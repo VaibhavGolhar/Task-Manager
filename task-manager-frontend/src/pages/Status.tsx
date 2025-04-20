@@ -10,6 +10,7 @@ import { useHistory } from 'react-router-dom';
 import { Preferences } from '@capacitor/preferences';
 import { logOutOutline, refresh } from 'ionicons/icons';
 import { fetchTasks } from '../apis/fetchTasksAPI';
+import { updateTask } from '../apis/updateTaskAPI';
 
 type Task = {
   taskId: string;
@@ -32,7 +33,14 @@ const TaskStatus: React.FC = () => {
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<'new' | 'inProgress' | 'submitted' | 'completed'>('new');
-  const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
+  const [expandedTasks, setExpandedTasks] = useState<{ [key: string]: boolean }>({}); // Track expanded state per task
+
+  const toggleTaskExpansion = (taskId: number) => {
+    setExpandedTasks(prev => ({
+      ...prev,
+      [taskId]: !prev[taskId], // Toggle the expanded state for the specific task
+    }));
+  };
 
   useEffect(() => {
     const loadTasks = async () => {
@@ -58,10 +66,28 @@ const TaskStatus: React.FC = () => {
     loadTasks();
   }, []);
 
-  const updateStatus = (id: number, newStatus: Task['status']) => {
-    setTasks(prev =>
-      prev.map(task => (parseInt(task.taskId) === id ? { ...task, status: newStatus } : task))
-    );
+  const updateStatus = async (id: number, newStatus: Task['status']) => {
+    const result = await updateTask(id, newStatus);
+    if (result !== 'ok') {
+      alert('Failed to update task, please try again later.');
+    } else{
+      setTasks(prev =>
+        prev.map(task => (parseInt(task.taskId) === id ? { ...task, status: newStatus } : task))
+      );
+      try {
+        const pref = await Preferences.get({ key: 'user' });
+        if (pref.value) {
+          const user = JSON.parse(pref.value);
+          const empId = user.empId.toString();
+          const fetchedTasks = await fetchTasks(empId);
+          setTasks(fetchedTasks as unknown as Task[]);
+          sessionStorage.setItem('tasks', JSON.stringify(fetchedTasks));
+          //console.log('Tasks refreshed:', fetchedTasks);
+        }
+      } catch (err) {
+        console.error('Failed to refresh tasks:', err);
+      }
+    }
   };
 
   const filteredTasks = tasks.filter(task => task.status === selectedStatus);
@@ -108,43 +134,104 @@ const TaskStatus: React.FC = () => {
         <div className="status-buttons ion-text-center ion-margin-bottom">
           <IonSegment value={selectedStatus} onIonChange={(e: CustomEvent) => setSelectedStatus(e.detail.value as 'new' | 'inProgress' | 'submitted' | 'completed')}>
             <IonSegmentButton value="new"><IonLabel>New Tasks ({tasks.filter(t => t.status === 'new').length})</IonLabel></IonSegmentButton>
-            <IonSegmentButton value="inProgress"><IonLabel>In Process ({tasks.filter(t => t.status === 'inProgress').length})</IonLabel></IonSegmentButton>
-            <IonSegmentButton value="submitted"><IonLabel>Submitted ({tasks.filter(t => t.status === 'submitted').length})</IonLabel></IonSegmentButton>
-            <IonSegmentButton value="completed"><IonLabel>Completed ({tasks.filter(t => t.status === 'completed').length})</IonLabel></IonSegmentButton>
+            <IonSegmentButton value="inProgress">
+              <IonLabel>In Process ({tasks.filter(t => t.status === 'inProgress').length})</IonLabel>
+            </IonSegmentButton>
+            <IonSegmentButton value="submitted">
+              <IonLabel>Submitted ({tasks.filter(t => t.status === 'submitted').length})</IonLabel>
+            </IonSegmentButton>
+            <IonSegmentButton value="completed">
+              <IonLabel>Completed ({tasks.filter(t => t.status === 'completed').length})</IonLabel>
+            </IonSegmentButton>
           </IonSegment>
         </div>
 
         {filteredTasks.map(task => (
-          <IonCard key={task.taskId} color="light" onClick={() => setExpandedTaskId(expandedTaskId === task.taskId ? null : task.taskId)}>
+          <IonCard
+            key={parseInt(task.taskId)}
+            color="light"
+            onClick={() => toggleTaskExpansion(parseInt(task.taskId))} // Toggle expansion for the clicked task
+          >
             <IonCardHeader>
-              <IonCardTitle>{task.taskHead}</IonCardTitle>
+              <IonCardTitle>{task.taskHead + " - " + parseInt(task.taskId)}</IonCardTitle>
               <p>{"From: " + task.fromDate} <br /> {"To: " + task.toDate}</p>
               <p><strong>Assigned By:</strong> {task.assignByName + ", " + task.assignByDesignation}</p>
             </IonCardHeader>
             <IonCardContent>
-              {expandedTaskId === task.taskId && (
-                <p><strong>Description:</strong> {task.task}</p>
-              )}
+              {expandedTasks[parseInt(task.taskId)] ? ( // Check if the task is expanded
+                <>
+                  <p><strong>Description:</strong> {task.task}</p>
 
-              {/* Buttons based on status */}
-              {task.status === 'new' && (
-                <IonButtons>
-                  <IonButton onClick={() => updateStatus(parseInt(task.taskId), 'inProgress')}>Start</IonButton>
-                  <IonButton color="medium" fill="outline">Close</IonButton>
-                </IonButtons>
-              )}
-              {task.status === 'inProgress' && (
-                <IonButtons>
-                  <IonButton onClick={() => updateStatus(parseInt(task.taskId), 'submitted')}>Submit</IonButton>
-                  <IonButton color="medium" fill="outline">Close</IonButton>
-                </IonButtons>
-              )}
-              {task.status === 'submitted' && (
-                <IonButtons>
-                  <IonButton onClick={() => updateStatus(parseInt(task.taskId), 'completed')}>Mark Completed</IonButton>
-                  <IonButton onClick={() => updateStatus(parseInt(task.taskId), 'inProgress')} color="warning">Unsubmit</IonButton>
-                </IonButtons>
-              )}
+                  {/* Buttons based on status */}
+                  {task.status === 'new' && (
+                    <IonButtons>
+                      <IonButton
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent click propagation
+                          updateStatus(parseInt(task.taskId), 'inProgress');
+                        }}
+                      >
+                        Start
+                      </IonButton>
+                      <IonButton
+                        color="medium"
+                        fill="outline"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent click propagation
+                          toggleTaskExpansion(parseInt(task.taskId)); // Close the task
+                        }}
+                      >
+                        Close
+                      </IonButton>
+                    </IonButtons>
+                  )}
+                  {task.status === 'inProgress' && (
+                    <IonButtons>
+                      <IonButton
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent click propagation
+                          updateStatus(parseInt(task.taskId), 'submitted');
+                        }}
+                      >
+                        Submit
+                      </IonButton>
+                      <IonButton
+                        color="medium"
+                        fill="outline"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent click propagation
+                          toggleTaskExpansion(parseInt(task.taskId)); // Close the task
+                        }}
+                      >
+                        Close
+                      </IonButton>
+                    </IonButtons>
+                  )}
+                  {task.status === 'submitted' && (
+                    <IonButtons>
+                      <IonButton
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent click propagation
+                          updateStatus(parseInt(task.taskId), 'inProgress');
+                        }}
+                        color="warning"
+                      >
+                        Unsubmit
+                      </IonButton>
+                      <IonButton
+                        color="medium"
+                        fill="outline"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent click propagation
+                          toggleTaskExpansion(parseInt(task.taskId)); // Close the task
+                        }}
+                      >
+                        Close
+                      </IonButton>
+                    </IonButtons>
+                  )}
+                </>
+              ) : null}
               {task.status === 'completed' && (
                 <IonLabel color="success">✔️ Task Completed</IonLabel>
               )}

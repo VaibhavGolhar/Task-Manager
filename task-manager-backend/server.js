@@ -20,6 +20,7 @@ app.use('/api/login', require('./routes/loginRoutes'));
 app.use('/api/employees', require('./routes/employeesRoutes'));
 app.use('/api/assignTask', require('./routes/assignTaskRoutes'));
 app.use('/api/fetchTasks', require('./routes/fetchTasksRoutes'));
+app.use('/api/updateTask', require('./routes/updateTaskRoutes'));
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);

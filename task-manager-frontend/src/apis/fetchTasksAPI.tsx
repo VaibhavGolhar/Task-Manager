@@ -21,7 +21,7 @@ type Task = {
 export const fetchTasks = async (empId: string): Promise<Task[]> => {
     try {
         const response = await axios.post(`${API_BASE_URL}/api/fetchTasks`, { empId });
-        //console.log('Fetched tasks:', response.data.tasks);
+        console.log('Fetched tasks:', response.data.tasks);
         return response.data.tasks;
     } catch (error) {
         console.error('Error fetching tasks:', error);

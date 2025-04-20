@@ -32,7 +32,7 @@ const fetchTasks = asyncHandler(async (req, res) => {
         res.status(200).json({
             message: "Tasks fetched successfully",
             tasks: tasks.map(task => ({
-            taskId: task.Taskid?.toString() || '',
+            taskId: task.TaskId?.toString() || '',
             department: task.DeptId?.toString() || '',
             taskHead: task.Remark?.toString() || '',
             task: task.TaskDesc || '',
