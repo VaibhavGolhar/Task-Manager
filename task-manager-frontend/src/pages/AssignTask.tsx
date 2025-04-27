@@ -12,6 +12,7 @@ import { assignTask } from '../apis/assignTaskAPI';
 import { Preferences } from '@capacitor/preferences';
 
 const AssignTask: React.FC = () => {
+  const [empId, setEmpId] = useState('');
   const [department, setDepartment] = useState('');
   const [taskHead, setTaskHead] = useState('');
   const [task, setTask] = useState('');
@@ -37,6 +38,8 @@ const AssignTask: React.FC = () => {
   const [employees, setEmployees] = useState<{ id: number; name: string }[]>([]);
   const [filteredEmployees, setFilteredEmployees] = useState<{ id: number; name: string }[]>([]);
   const [showEmployeeSuggestions, setShowEmployeeSuggestions] = useState(false);
+  const [showAssignBySuggestions, setShowAssignBySuggestions] = useState(false); // Separate state for Assign By suggestions
+  const [filteredAssignByEmployees, setFilteredAssignByEmployees] = useState<{ id: number; name: string }[]>([]); // Separate filtered employees for Assign By
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -45,6 +48,7 @@ const AssignTask: React.FC = () => {
         const user = JSON.parse(value);
         setAssignBy(user.employeeName);
         setAssignById(user.empId); // Extract `employeeName` from the stored user object
+        setEmpId(user.empId);
       }
     };
 
@@ -218,12 +222,73 @@ const AssignTask: React.FC = () => {
 
           <IonItem>
             <IonLabel position="stacked">Assign By</IonLabel>
-            <IonInput
-              value={assignBy || 'Loading...'} // Show "Loading..." until the user's name is fetched
-              readonly // Make the field unchangeable
-            />
+            {empId === '0' ? (
+              <IonInput
+                value={assignBy}
+                onIonInput={async e => {
+                  const value = e.detail.value!;
+                  setAssignBy(value);
+
+                  // Fetch employees if not already available
+                  if (employees.length === 0) {
+                    try {
+                      const cached = sessionStorage.getItem('employeeData');
+                      let data;
+                      if (cached) {
+                        data = JSON.parse(cached);
+                      } else {
+                        data = await getEmployees();
+                        sessionStorage.setItem('employeeData', JSON.stringify(data));
+                      }
+                      setEmployees(data);
+                    } catch (error) {
+                      console.error("Error fetching employees:", error);
+                    }
+                  }
+
+                  // Filter employees based on input for Assign By
+                  const filtered = employees.filter(emp =>
+                    emp.name && emp.name.toLowerCase().includes(value.toLowerCase())
+                  );
+                  setFilteredAssignByEmployees(filtered);
+
+                  // Show suggestions only if there are matches and input is not empty
+                  setShowAssignBySuggestions(value.trim().length > 0 && filtered.length > 0);
+                }}
+                placeholder="Type to search employees"
+              />
+            ) : (
+              <IonInput
+                value={assignBy || 'Loading...'}
+                readonly={true} // Allow editing even after selection
+                onIonInput={() => {
+                  setAssignBy('');
+                  setAssignById('0');
+                  setShowAssignBySuggestions(false);
+                }}
+              />
+            )}
             <IonIcon slot="end" icon={person} />
           </IonItem>
+
+          {/* Separate suggestion list for Assign By */}
+          {empId === '0' && showAssignBySuggestions && filteredAssignByEmployees.length > 0 && (
+            <IonList style={{ maxHeight: '150px', overflowY: 'auto' }}>
+              {filteredAssignByEmployees.map((emp: { id: number; name: string }) => (
+                <IonItem
+                  key={emp.id}
+                  button
+                  onClick={() => {
+                    setAssignBy(emp.name);
+                    setAssignById(emp.id.toString());
+                    setShowAssignBySuggestions(false);
+                  }}
+                >
+                  {emp.name}
+                </IonItem>
+              ))}
+            </IonList>
+          )}
 
           <IonItem>
             <IonLabel position="stacked">Priority</IonLabel>
