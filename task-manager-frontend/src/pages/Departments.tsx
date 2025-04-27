@@ -7,7 +7,8 @@ import {
   calendarOutline, leafOutline, buildOutline, schoolOutline, heartOutline,
   flaskOutline, constructOutline, businessOutline, peopleOutline, earthOutline,
   hammerOutline, gitNetworkOutline, laptopOutline, searchOutline,
-  arrowBack
+  arrowBack,
+  logOutOutline
 } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
 import { Preferences } from '@capacitor/preferences';
@@ -44,7 +45,7 @@ const Departments: React.FC = () => {
       const employees = JSON.parse(storedEmployees);
       history.push({
         pathname: '/DepartmentEmployees',
-        state: { employees }
+        state: { employees, label } // Pass the label here
       });
     } else {
       // If not, fetch employees and store them in session storage
@@ -52,7 +53,7 @@ const Departments: React.FC = () => {
       sessionStorage.setItem(`${label}Employees`, JSON.stringify(res));
       history.push({
         pathname: '/DepartmentEmployees',
-        state: { employees: res }
+        state: { employees: res, label } // Pass the label here
       });
     }
   };
@@ -61,10 +62,10 @@ const Departments: React.FC = () => {
     <IonPage>
       <IonHeader>
         <IonToolbar>
-        <IonButtons slot="start">
-          <IonButton onClick={() => history.push('/Status')}>
-              <IonIcon icon={arrowBack} />
-          </IonButton>
+        <IonButtons slot="end">
+        <IonButton onClick={() => history.push('/Status', { from: 'Departments' })}>
+          Status Tab
+        </IonButton>
         </IonButtons>
           <IonTitle>Departments</IonTitle>
           <IonButtons slot="end">
@@ -73,7 +74,9 @@ const Departments: React.FC = () => {
                 await Preferences.remove({ key: 'user' });
                 sessionStorage.clear();
                 history.replace('/login'); 
-                }}>Logout</IonButton>
+                }}>
+                  <IonIcon icon={logOutOutline} />
+                </IonButton>
           </IonButtons>
         </IonToolbar>
       </IonHeader>

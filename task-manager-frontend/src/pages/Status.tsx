@@ -8,7 +8,7 @@ import {
 } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import { Preferences } from '@capacitor/preferences';
-import { logOutOutline, refresh } from 'ionicons/icons';
+import { arrowBack, arrowBackOutline, logOutOutline, refresh } from 'ionicons/icons';
 import { fetchTasks } from '../apis/fetchTasksAPI';
 import { updateTask } from '../apis/updateTaskAPI';
 
@@ -29,8 +29,12 @@ type Task = {
   status: string;
 };
 
+type LocationState = {
+  from?: string;
+};
+
 const TaskStatus: React.FC = () => {
-  const history = useHistory();
+  const history = useHistory<LocationState>();
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<'new' | 'inProgress' | 'submitted' | 'completed'>('new');
@@ -93,13 +97,22 @@ const TaskStatus: React.FC = () => {
 
   const filteredTasks = tasks.filter(task => task.status === selectedStatus);
 
+  
+
   return (
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonButtons slot="start">
-            <IonBackButton />
-          </IonButtons>
+        <IonButtons slot="start">
+          <IonButton style={{
+              zIndex: 999,
+              position: 'relative',
+              padding: '8px',
+            }} onClick={() => history.goBack()}>
+            <IonIcon color='black' icon = {arrowBackOutline}>
+            </IonIcon>
+          </IonButton>
+        </IonButtons>
           <IonTitle>Status</IonTitle>
           <IonButtons slot="end">
             <IonButton onClick={async () => {

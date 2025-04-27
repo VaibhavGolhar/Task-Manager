@@ -4,7 +4,6 @@ const pool = require('../config/dbConnection');
 
 const getDepartmentEmployees = asyncHandler(async (req, res) => {
     try {
-        //console.log('Fetching employees...');
         const { departmentName } = req.body;
 
         if (!departmentName) {
@@ -13,15 +12,22 @@ const getDepartmentEmployees = asyncHandler(async (req, res) => {
 
         const query = `
             SELECT 
-                e.Id AS EmployeeId,
+                e.EmployeeId AS EmployeeId,
                 e.EmployeeName,
                 des.Designation AS DesignationName,
-                t.Status AS TaskStatus
+                t.TaskId AS TaskId,
+                t.TaskDesc,
+                t.Status AS TaskStatus,
+                SUM(tr.WorkingHrs) AS TotalWorkingHrs
             FROM dbo.EmployeeMaster e
             INNER JOIN dbo.Department d ON e.DepartmentId = d.DearptmentId
             INNER JOIN dbo.Designation des ON e.DesignationId = des.DesignationId
             LEFT JOIN dbo.TaskCreate_Header t ON e.EmployeeId = t.AssignToId
-            WHERE d.Department = @departmentName;
+            LEFT JOIN dbo.TaskCreate_Row tr ON t.TaskId = tr.TaskId
+            WHERE d.Department = @departmentName
+			GROUP BY 
+                e.EmployeeId, e.EmployeeName, des.Designation, 
+                t.TaskId, t.TaskDesc, t.Status;
         `;
 
         const result = await pool.request()
@@ -29,7 +35,7 @@ const getDepartmentEmployees = asyncHandler(async (req, res) => {
             .query(query);
 
         const rows = result.recordset;
-        //console.log(rows);
+
         // Group tasks by employee and count task statuses
         const employeesMap = new Map();
 
@@ -42,12 +48,14 @@ const getDepartmentEmployees = asyncHandler(async (req, res) => {
                     newTasks: 0,
                     inProgressTasks: 0,
                     submittedTasks: 0,
-                    completedTasks: 0
+                    completedTasks: 0,
+                    tasks: [] // Add a tasks array to store task details
                 });
             }
 
             const employee = employeesMap.get(row.EmployeeId);
 
+            // Count task statuses
             switch (row.TaskStatus) {
                 case 'new':
                     employee.newTasks += 1;
@@ -64,11 +72,20 @@ const getDepartmentEmployees = asyncHandler(async (req, res) => {
                 default:
                     break;
             }
+
+            // Add task details to the tasks array
+            if (row.TaskId) {
+                employee.tasks.push({
+                    taskId: row.TaskId,
+                    description: row.TaskDesc,
+                    status: row.TaskStatus,
+                    workingHrs: row.TotalWorkingHrs || 0 // Default to 0 if WorkingHrs is null
+                });
+            }
         });
 
         const employees = Array.from(employeesMap.values());
 
-        //console.log('Employees fetched successfully:', employees);
         res.status(200).json(employees);
     } catch (error) {
         console.error('Error fetching employees:', error);
