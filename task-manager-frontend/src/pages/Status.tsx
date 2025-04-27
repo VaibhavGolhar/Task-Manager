@@ -25,6 +25,7 @@ type Task = {
   fromDate: string;
   toDate: string;
   estHours: string;
+  workingHrs: string;
   status: string;
 };
 
@@ -153,9 +154,11 @@ const TaskStatus: React.FC = () => {
             onClick={() => toggleTaskExpansion(parseInt(task.taskId))} // Toggle expansion for the clicked task
           >
             <IonCardHeader>
-              <IonCardTitle>{task.taskHead + " - " + parseInt(task.taskId)}</IonCardTitle>
+              <IonCardTitle>{task.taskHead}</IonCardTitle>
               <p>{"From: " + task.fromDate} <br /> {"To: " + task.toDate}</p>
               <p><strong>Assigned By:</strong> {task.assignByName + ", " + task.assignByDesignation}</p>
+              <br />
+              <p>Total Working hours: {task.workingHrs}</p>
             </IonCardHeader>
             <IonCardContent>
               {expandedTasks[parseInt(task.taskId)] ? ( // Check if the task is expanded
