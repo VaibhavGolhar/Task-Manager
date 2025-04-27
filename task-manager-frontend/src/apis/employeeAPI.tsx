@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-type Employee = { id: number; name: string };
+type Employee = { id: number; name: string; department: string };
 
 const API_BASE_URL = 'http://localhost:8080';
 

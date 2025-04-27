@@ -35,7 +35,9 @@ const AssignTask: React.FC = () => {
   ];
   const [showDepartmentModal, setShowDepartmentModal] = useState(false);
   const [filteredDepartments, setFilteredDepartments] = useState(departments);
-  const [employees, setEmployees] = useState<{ id: number; name: string }[]>([]);
+  const [employees, setEmployees] = useState<{
+    department: string; id: number; name: string 
+}[]>([]);
   const [filteredEmployees, setFilteredEmployees] = useState<{ id: number; name: string }[]>([]);
   const [showEmployeeSuggestions, setShowEmployeeSuggestions] = useState(false);
   const [showAssignBySuggestions, setShowAssignBySuggestions] = useState(false); // Separate state for Assign By suggestions
@@ -168,7 +170,7 @@ const AssignTask: React.FC = () => {
                       sessionStorage.setItem('employeeData', JSON.stringify(data));
                     }
                     setEmployees(data);
-                    console.log("Fetched employees:", data); // Debugging
+                    //console.log("Fetched employees:", data); // Debugging
                   } catch (error) {
                     console.error("Error fetching employees:", error);
                   }
@@ -177,6 +179,7 @@ const AssignTask: React.FC = () => {
                 // Filter employees based on input
                 const filtered = employees.filter(emp =>
                   emp.name && emp.name.toLowerCase().includes(value.toLowerCase())
+                  && emp.department === department // Filter by department
                 );
                 setFilteredEmployees(filtered);
 
