@@ -7,7 +7,6 @@ import {
   calendarOutline, leafOutline, buildOutline, schoolOutline, heartOutline,
   flaskOutline, constructOutline, businessOutline, peopleOutline, earthOutline,
   hammerOutline, gitNetworkOutline, laptopOutline, searchOutline,
-  arrowBack,
   logOutOutline
 } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
@@ -65,6 +64,12 @@ const Departments: React.FC = () => {
         <IonButtons slot="end">
         <IonButton onClick={() => history.push('/Status', { from: 'Departments' })}>
           Status Tab
+        </IonButton>
+        <IonButton onClick={() => history.push('/MonthlyReport')}>
+          Monthly Report
+        </IonButton>
+        <IonButton onClick={() => history.push('/ConsolidatedReport')}>
+          Consolidated Report
         </IonButton>
         </IonButtons>
           <IonTitle>Departments</IonTitle>

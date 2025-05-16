@@ -23,6 +23,8 @@ import Status from './pages/Status';
 import AssignTask from './pages/AssignTask';
 import TaskUpdation from './pages/TaskUpdation';
 import DepartmentEmployees from './pages/DepartmentEmployees';
+import MonthlyReport from './pages/MonthlyReport';
+import ConsolidatedReport from './pages/ConsolidatedReport';
 
 setupIonicReact();
 
@@ -38,6 +40,8 @@ const App: React.FC = () => (
         <Route path="/AssignTask" component={AssignTask} exact={true} />
         <Route path="/TaskUpdation" component={TaskUpdation} exact={true} />
         <Route path='/DepartmentEmployees' component={DepartmentEmployees} exact={true} />
+        <Route path='/MonthlyReport' component={MonthlyReport} exact={true} />
+        <Route path='/ConsolidatedReport' component={ConsolidatedReport} exact={true} />
         <Redirect exact from="/" to="/Login" />
       </IonRouterOutlet>
     </BrowserRouter>
